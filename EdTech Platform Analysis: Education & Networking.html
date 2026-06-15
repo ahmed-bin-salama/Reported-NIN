@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdTech & Professional Network Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Scholarly Horizon - A clean, professional palette using Slate-50 for backgrounds, Indigo-600 for primary actions, and Emerald-500 for success metrics. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 450px; }
+        .platform-card:hover { transform: translateY(-4px); transition: all 0.3s ease; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Application Structure Plan: 
+        1. Header & Executive Summary: Sets the context of the EdTech/Social intersection.
+        2. Strategic Landscape (Dashboard): A high-level visualization using a Bubble Chart to map "Learning Depth" vs "Social Interaction" vs "Market Scale". This allows users to see where clusters form (e.g., LMS vs Marketplaces).
+        3. Platform Explorer: The core interactive component. A filterable grid of 12 key platforms. Users can filter by "Category" to understand structural differences.
+        4. Platform Detail View: A dynamic side-panel or modal that updates based on selection, providing deep-dive specs and a Radar Chart showing specific feature strengths (Social, Learning, Professional, Marketplace).
+        5. The Pipeline Synthesis: A summary section explaining the Education-to-Career flow.
+    -->
+
+    <nav class="sticky top-0 z-50 glass-panel border-b border-slate-200 py-4 px-6 mb-8">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">E</div>
+                <span class="text-xl font-bold text-slate-800 tracking-tight">EdTech<span class="text-indigo-600">Intel</span></span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                <a href="#landscape" class="hover:text-indigo-600 transition">Landscape Map</a>
+                <a href="#explorer" class="hover:text-indigo-600 transition">Platform Explorer</a>
+                <a href="#analysis" class="hover:text-indigo-600 transition">Strategic Analysis</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 pb-20">
+        <!-- Hero Section -->
+        <section class="mb-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">The Convergence of Learning & Networking</h1>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Analyzing the platforms that bridge academic rigor with professional opportunity. This intelligence report maps the global SaaS ecosystem where skill acquisition meets career transition.
+            </p>
+        </section>
+
+        <!-- Visualization & Content Choices: 
+            - Goal: Compare Landscape | Viz: Bubble Chart | Library: Chart.js
+            - Justification: Best for showing three dimensions (Interaction, Learning Depth, Market Size) simultaneously to reveal categorical clusters.
+            - Goal: Detail Deep Dive | Viz: Radar Chart | Library: Chart.js
+            - Justification: Excellent for comparing specific strengths of a single platform across four key pillars: Social, Learning, Career, and Marketplace.
+            - Goal: Filter Information | Element: Dynamic Cards + Filter Logic | Library: Vanilla JS
+            - Justification: Allows users to focus on specific segments (e.g., LMS vs Tutoring) without information overload.
+        -->
+
+        <!-- Landscape Section -->
+        <section id="landscape" class="mb-20">
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Market Ecosystem Positioning</h2>
+                    <p class="text-slate-600 italic">This map visualizes the tension between deep academic content and social/networking utility. Large bubbles indicate higher institutional or global adoption.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="landscapeChart"></canvas>
+                </div>
+                <div class="mt-6 flex flex-wrap justify-center gap-4 text-xs font-semibold uppercase tracking-wider">
+                    <span class="flex items-center text-blue-600"><span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span> Professional/Career</span>
+                    <span class="flex items-center text-indigo-600"><span class="w-3 h-3 bg-indigo-500 rounded-full mr-1"></span> Academic/LMS</span>
+                    <span class="flex items-center text-emerald-600"><span class="w-3 h-3 bg-emerald-500 rounded-full mr-1"></span> Marketplaces</span>
+                    <span class="flex items-center text-orange-600"><span class="w-3 h-3 bg-orange-500 rounded-full mr-1"></span> Social Communities</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Explorer Section -->
+        <section id="explorer" class="mb-20">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Platform Explorer</h2>
+                    <p class="text-slate-600">Select a category to filter or a platform to view granular specifications.</p>
+                </div>
+                <div class="flex flex-wrap gap-2" id="filterButtons">
+                    <button onclick="filterPlatforms('All')" class="px-4 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium shadow-sm">All</button>
+                    <button onclick="filterPlatforms('LMS')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">LMS</button>
+                    <button onclick="filterPlatforms('Network')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">Networks</button>
+                    <button onclick="filterPlatforms('Marketplace')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">Marketplaces</button>
+                    <button onclick="filterPlatforms('Skill-based')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">Skill-based</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- List Side -->
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar" id="platformGrid">
+                    <!-- Dynamic Content Loaded via JS -->
+                </div>
+
+                <!-- Detail Side -->
+                <div class="lg:col-span-1">
+                    <div id="detailPanel" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sticky top-24">
+                        <div id="emptyDetail" class="text-center py-20 text-slate-400">
+                            <div class="text-5xl mb-4">🔭</div>
+                            <p>Select a platform to explore detailed analytics and feature sets.</p>
+                        </div>
+                        <div id="activeDetail" class="hidden">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 id="detName" class="text-2xl font-bold text-slate-900">Platform Name</h3>
+                                    <span id="detCategory" class="text-xs font-bold uppercase tracking-widest text-indigo-600">Category</span>
+                                </div>
+                                <div id="detScale" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold">10M+ Users</div>
+                            </div>
+                            
+                            <p id="detValProp" class="text-sm text-slate-600 mb-6 italic border-l-4 border-indigo-200 pl-3">Value proposition text here.</p>
+                            
+                            <div class="mb-8">
+                                <h4 class="text-sm font-bold text-slate-800 mb-4">Capability Profile</h4>
+                                <div class="w-full h-48">
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="p-3 bg-slate-50 rounded-xl">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">Primary Users</h5>
+                                    <p id="detUsers" class="text-sm text-slate-800">Higher Ed, Professionals</p>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">Core Features</h5>
+                                    <ul id="detFeatures" class="text-sm text-slate-800 space-y-1">
+                                        <!-- Dynamic list -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Section -->
+        <section id="analysis" class="grid grid-cols-1 md:grid-cols-2 gap-12 pt-16 border-t border-slate-200">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">The Education-to-Career Pipeline</h2>
+                <p class="text-slate-600 mb-4 leading-relaxed">
+                    Modern EdTech is shifting from simple content delivery (LMS 1.0) to integrated ecosystems that treat learning as a social and professional asset. We identify three distinct shifts:
+                </p>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">1</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Credential-First Networking</h4>
+                            <p class="text-sm text-slate-500">Platforms like Coursera and GitHub use completed projects and certificates as the foundation for professional identity, replacing the traditional CV.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">2</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Marketplace Integration</h4>
+                            <p class="text-sm text-slate-500">The rise of "Direct-to-Expert" platforms (Maven, Outschool) creates fluid marketplaces where the teacher-student bond is a dynamic social transaction.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">3</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Early-Career Gatewaying</h4>
+                            <p class="text-sm text-slate-500">Specialized networks like Handshake have successfully disintermediated LinkedIn for the Gen-Z demographic by focusing on institutional integration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-indigo-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-bold mb-4">Strategic Conclusion</h2>
+                    <p class="text-indigo-100 mb-6 leading-relaxed">
+                        The "Winner-Take-All" effect is becoming evident in niche EdTech verticals. Successful platforms no longer just offer courses; they offer <strong>communities and career trajectories</strong>. 
+                    </p>
+                    <div class="p-6 bg-indigo-800/50 rounded-2xl border border-indigo-700">
+                        <h4 class="text-indigo-300 uppercase text-xs font-bold tracking-widest mb-3">Core Insight</h4>
+                        <p class="text-lg font-medium italic">"The most valuable asset in EdTech is no longer content—it is the social validation of acquired skills within a professional network."</p>
+                    </div>
+                </div>
+                <!-- Abstract visual element using CSS -->
+                <div class="absolute -bottom-10 -right-10 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                <div class="absolute top-10 right-10 w-24 h-24 bg-white/5 rounded-full border border-white/10"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-sm">
+            <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-xs">E</div>
+                <span class="text-white font-bold tracking-tight">EdTechIntel Report 2024</span>
+            </div>
+            <p>Data provided for market analysis purposes. All trademarks belong to their respective owners.</p>
+            <div class="flex gap-6">
+                <span>Privacy Policy</span>
+                <span>Terms of Service</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script>
+        const platforms = [
+            {
+                id: 1,
+                name: "Canvas by Instructure",
+                category: "LMS",
+                users: "K12, Higher Ed, Institutions",
+                valProp: "The backbone of modern academic infrastructure.",
+                scale: "30M+ Users",
+                scores: [30, 95, 20, 10], // Social, Learning, Career, Marketplace
+                features: ["Classroom Management", "Social Discussions", "Global Peer Review", "Integration APIs"],
+                bubble: { x: 20, y: 90, r: 25, color: '#4f46e5' }
+            },
+            {
+                id: 2,
+                name: "Handshake",
+                category: "Network",
+                users: "Students, Career Centers, Employers",
+                valProp: "The early-career alternative to LinkedIn for Gen Z.",
+                scale: "12M+ Students",
+                scores: [70, 20, 95, 40],
+                features: ["Virtual Career Fairs", "Student-to-Employer Messaging", "Verified Internships", "Alumni Networking"],
+                bubble: { x: 85, y: 30, r: 18, color: '#2563eb' }
+            },
+            {
+                id: 3,
+                name: "Coursera",
+                category: "Skill-based",
+                users: "Lifelong Learners, Professionals",
+                valProp: "Democratizing Ivy League education through scale.",
+                scale: "140M+ Learners",
+                scores: [25, 90, 80, 50],
+                features: ["University Certificates", "Guided Projects", "Peer Interaction", "Enterprise Upskilling"],
+                bubble: { x: 40, y: 80, r: 30, color: '#10b981' }
+            },
+            {
+                id: 4,
+                name: "Maven",
+                category: "Marketplace",
+                users: "Experts, Creators, Professionals",
+                valProp: "Pioneering cohort-based learning with community density.",
+                scale: "$25M+ Funding",
+                scores: [85, 75, 40, 90],
+                features: ["Cohort Management", "Community Boards", "Expert Matching", "Interactive Workshops"],
+                bubble: { x: 75, y: 70, r: 10, color: '#f59e0b' }
+            },
+            {
+                id: 5,
+                name: "GitHub",
+                category: "Skill-based",
+                users: "Developers, Students, Recruiters",
+                valProp: "The definitive portfolio and professional network for tech.",
+                scale: "100M+ Devs",
+                scores: [60, 40, 98, 30],
+                features: ["Portfolio Hosting", "Social Coding", "Classroom Integration", "Job Matching"],
+                bubble: { x: 80, y: 45, r: 22, color: '#10b981' }
+            },
+            {
+                id: 6,
+                name: "Outschool",
+                category: "Marketplace",
+                users: "K12 Students, Independent Teachers",
+                valProp: "Interest-based live classes for younger learners.",
+                scale: "1M+ Classes",
+                scores: [50, 70, 10, 95],
+                features: ["Small Group Interaction", "Parent-Teacher Comms", "Marketplace Discovery", "Gamified Learning"],
+                bubble: { x: 50, y: 65, r: 15, color: '#f59e0b' }
+            },
+            {
+                id: 7,
+                name: "Piazza",
+                category: "Network",
+                users: "STEM Students, TAs, Professors",
+                valProp: "The leading Q&A social learning platform for Higher Ed.",
+                scale: "5M+ Students",
+                scores: [90, 60, 50, 5],
+                features: ["Wiki-style Editing", "Anonymous Q&A", "Career Career Recruiting", "LaTeX Support"],
+                bubble: { x: 90, y: 60, r: 12, color: '#2563eb' }
+            },
+            {
+                id: 8,
+                name: "Preply",
+                category: "Marketplace",
+                users: "Language Learners, Tutors",
+                valProp: "Human-centric skill exchange at a global scale.",
+                scale: "50k+ Tutors",
+                scores: [40, 60, 10, 98],
+                features: ["Tutor-Learner Matching", "Video Classroom", "Scheduling Suite", "Curriculum Marketplace"],
+                bubble: { x: 30, y: 55, r: 12, color: '#f59e0b' }
+            },
+            {
+                id: 9,
+                name: "LinkedIn Learning",
+                category: "Skill-based",
+                users: "Corporate Employees, Job Seekers",
+                valProp: "Seamlessly bridging content consumption and professional identity.",
+                scale: "950M+ Profiles",
+                scores: [45, 80, 95, 30],
+                features: ["Automatic Certificate Posting", "Skill Endorsements", "Learning Path Groups", "Recruiter Insights"],
+                bubble: { x: 60, y: 75, r: 28, color: '#10b981' }
+            },
+            {
+                id: 10,
+                name: "Discord (Education)",
+                category: "Network",
+                users: "Study Groups, Bootcamps, Online Communities",
+                valProp: "Turning casual social spaces into high-velocity learning zones.",
+                scale: "Millions of Study Servers",
+                scores: [98, 30, 20, 15],
+                features: ["Voice Study Rooms", "Roles & Hierarchies", "Bot Automation", "Screen Sharing"],
+                bubble: { x: 95, y: 25, r: 20, color: '#2563eb' }
+            },
+            {
+                id: 11,
+                name: "Chegg",
+                category: "Marketplace",
+                users: "Students, Tutors",
+                valProp: "The on-demand utility for academic support.",
+                scale: "8M+ Subscribers",
+                scores: [20, 50, 10, 90],
+                features: ["24/7 Expert Tutoring", "Homework Help", "Skills Platform", "Community Q&A"],
+                bubble: { x: 25, y: 40, r: 16, color: '#f59e0b' }
+            },
+            {
+                id: 12,
+                name: "Google Classroom",
+                category: "LMS",
+                users: "K12 Teachers, Students",
+                valProp: "The simplest workflow for digital social classrooms.",
+                scale: "150M+ Users",
+                scores: [40, 85, 10, 5],
+                features: ["Stream Communication", "Guardian Summaries", "G-Suite Integration", "Social Comments"],
+                bubble: { x: 15, y: 85, r: 24, color: '#4f46e5' }
+            }
+        ];
+
+        let radarChartInstance = null;
+        let landscapeChartInstance = null;
+
+        function initLandscapeChart() {
+            const ctx = document.getElementById('landscapeChart').getContext('2d');
+            const datasets = platforms.map(p => ({
+                label: p.name,
+                data: [{ x: p.bubble.x, y: p.bubble.y, r: p.bubble.r }],
+                backgroundColor: p.bubble.color + '88',
+                borderColor: p.bubble.color,
+                borderWidth: 2
+            }));
+
+            landscapeChartInstance = new Chart(ctx, {
+                type: 'bubble',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { display: true, text: 'Social Interaction & Networking Strength →', font: { weight: 'bold' } },
+                            min: 0, max: 100 
+                        },
+                        y: { 
+                            title: { display: true, text: 'Depth of Structured Learning →', font: { weight: 'bold' } },
+                            min: 0, max: 100 
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => context.dataset.label
+                            }
+                        },
+                        legend: { display: false }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].datasetIndex;
+                            showDetail(platforms[index].id);
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateRadarChart(scores) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+            
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Social', 'Learning', 'Career', 'Marketplace'],
+                    datasets: [{
+                        label: 'Strength',
+                        data: scores,
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: 'rgb(79, 70, 229)',
+                        pointBackgroundColor: 'rgb(79, 70, 229)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { beginAtZero: true, max: 100, ticks: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function showDetail(id) {
+            const p = platforms.find(x => x.id === id);
+            document.getElementById('emptyDetail').classList.add('hidden');
+            document.getElementById('activeDetail').classList.remove('hidden');
+            
+            document.getElementById('detName').innerText = p.name;
+            document.getElementById('detCategory').innerText = p.category;
+            document.getElementById('detScale').innerText = p.scale;
+            document.getElementById('detValProp').innerText = p.valProp;
+            document.getElementById('detUsers').innerText = p.users;
+            
+            const featureList = document.getElementById('detFeatures');
+            featureList.innerHTML = p.features.map(f => `<li class="flex items-start"><span class="text-indigo-500 mr-2">•</span>${f}</li>`).join('');
+            
+            updateRadarChart(p.scores);
+            
+            // Scroll to detail on mobile
+            if(window.innerWidth < 1024) {
+                document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function filterPlatforms(cat) {
+            const grid = document.getElementById('platformGrid');
+            const btns = document.querySelectorAll('#filterButtons button');
+            
+            btns.forEach(b => {
+                if(b.innerText === cat) {
+                    b.classList.remove('bg-white', 'text-slate-600');
+                    b.classList.add('bg-indigo-600', 'text-white');
+                } else {
+                    b.classList.add('bg-white', 'text-slate-600');
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                }
+            });
+
+            const filtered = cat === 'All' ? platforms : platforms.filter(p => p.category === cat);
+            
+            grid.innerHTML = filtered.map(p => `
+                <div onclick="showDetail(${p.id})" class="platform-card cursor-pointer bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded uppercase tracking-wide">${p.category}</span>
+                        <span class="text-[10px] font-bold text-emerald-500">POPULAR</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-1">${p.name}</h3>
+                    <p class="text-xs text-slate-500 line-clamp-2">${p.valProp}</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 font-medium">${p.scale}</span>
+                        <span class="text-indigo-600 text-xs font-bold flex items-center">Analyze →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        window.onload = () => {
+            initLandscapeChart();
+            filterPlatforms('All');
+        };
+    </script>
+</body>
+</html>
