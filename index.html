@@ -3,853 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navigated Institute Nexus (NIN)</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>EdTech & Professional Network Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Scholarly Horizon - A clean, professional palette using Slate-50 for backgrounds, Indigo-600 for primary actions, and Emerald-500 for success metrics. -->
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --primary: #0F2A5F;
-            --accent-teal: #0F525F;
-            --accent-indigo: #1C0F5F;
-            --bg-dark: #0a0e1a;
-            --bg-card: rgba(15, 42, 95, 0.4);
-            --text-primary: #e0e6f0;
-            --text-secondary: #8a9bb8;
-            --text-muted: #5a6b88;
-            --border: rgba(15, 82, 95, 0.3);
-            --glow: rgba(15, 82, 95, 0.5);
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        #app {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Background Layer */
-        .background-layer {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 0;
-            background: 
-                radial-gradient(ellipse at 20% 80%, rgba(15, 42, 95, 0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(28, 15, 95, 0.2) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(15, 82, 95, 0.1) 0%, transparent 70%),
-                var(--bg-dark);
-        }
-
-        .noise-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            pointer-events: none;
-        }
-
-        .stars {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-        }
-
-        .star {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: rgba(200, 220, 255, 0.6);
-            border-radius: 50%;
-        }
-
-        /* UI Root */
-        .ui-root {
-            position: relative;
-            z-index: 1;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Logo Anchor */
-        .logo-anchor {
-            position: absolute;
-            z-index: 100;
-            cursor: pointer;
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-anchor.center {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .logo-anchor.top-left {
-            top: 20px;
-            left: 24px;
-            transform: translate(0, 0) scale(0.8);
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent-teal), var(--primary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 20px;
-            color: white;
-            box-shadow: 0 0 30px rgba(15, 82, 95, 0.4);
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .logo-anchor.top-left .logo-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.5px;
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-            white-space: nowrap;
-            opacity: 0;
-            transform: translateX(-10px);
-        }
-
-        .logo-anchor.top-left .logo-text {
-            opacity: 1;
-            transform: translateX(0);
-            font-size: 18px;
-        }
-
-        .logo-anchor.center .logo-text {
-            opacity: 0;
-            transform: translateX(-10px);
-        }
-
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%;
-            height: 72px;
-            z-index: 90;
-            display: flex;
-            align-items: center;
-            padding: 0 24px 0 140px;
-            gap: 32px;
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-            opacity: 0;
-            transform: translateX(-20px);
-            pointer-events: none;
-            background: linear-gradient(180deg, rgba(10, 14, 26, 0.9) 0%, transparent 100%);
-        }
-
-        .navbar.visible {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: all;
-        }
-
-        .nav-item {
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 6px 12px;
-            border-radius: 6px;
-            position: relative;
-        }
-
-        .nav-item:hover {
-            color: var(--text-primary);
-            background: rgba(15, 82, 95, 0.2);
-        }
-
-        .nav-item.active {
-            color: var(--text-primary);
-            background: rgba(15, 82, 95, 0.3);
-        }
-
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 12px;
-            right: 12px;
-            height: 2px;
-            background: var(--accent-teal);
-            border-radius: 1px;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .hero-content {
-            text-align: center;
-            margin-top: 80px;
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .hero-title {
-            font-size: 48px;
-            font-weight: 800;
-            color: var(--text-primary);
-            letter-spacing: -1px;
-            margin-bottom: 12px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.6s ease;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.6s ease;
-            transition-delay: 0.1s;
-        }
-
-        .hero-cta-group {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 24px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.6s ease;
-            transition-delay: 0.2s;
-        }
-
-        .hero-secondary {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.6s ease;
-            transition-delay: 0.3s;
-        }
-
-        .hero-section.loaded .hero-title,
-        .hero-section.loaded .hero-subtitle,
-        .hero-section.loaded .hero-cta-group,
-        .hero-section.loaded .hero-secondary {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .hero-section.compressed {
-            transform: scale(0.95);
-            opacity: 0.6;
-            filter: blur(1px);
-        }
-
-        .hero-section.hidden {
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.9);
-        }
-
-        /* CTA Buttons */
-        .cta-btn {
-            padding: 14px 32px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            outline: none;
-        }
-
-        .cta-btn.primary {
-            background: linear-gradient(135deg, var(--accent-teal), var(--primary));
-            color: white;
-            box-shadow: 0 4px 20px rgba(15, 82, 95, 0.3);
-        }
-
-        .cta-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(15, 82, 95, 0.5);
-        }
-
-        .cta-btn.secondary {
-            background: rgba(15, 42, 95, 0.3);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
-
-        .cta-btn.secondary:hover {
-            background: rgba(15, 42, 95, 0.5);
-            color: var(--text-primary);
-            border-color: var(--accent-teal);
-        }
-
-        .cta-btn.small {
-            padding: 10px 24px;
-            font-size: 13px;
-            opacity: 0.7;
-        }
-
-        .cta-btn.small:hover {
-            opacity: 1;
-        }
-
-        /* Student View */
-        .student-view {
-            position: absolute;
-            top: 72px; left: 0;
-            width: 100%;
-            height: calc(100vh - 72px);
-            z-index: 20;
-            overflow-y: auto;
-            padding: 24px 32px;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-            pointer-events: none;
-        }
-
-        .student-view.visible {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: all;
-        }
-
-        .student-view.collapsing {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.98);
-        }
-
-        /* Search Module */
-        .search-module {
-            max-width: 700px;
-            margin: 0 auto 40px;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.6s ease;
-        }
-
-        .student-view.visible .search-module {
-            opacity: 1;
-            transform: translateY(0);
-            transition-delay: 0.1s;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 16px 24px;
-            border-radius: 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .search-box::placeholder {
-            color: var(--text-muted);
-        }
-
-        .search-box:focus {
-            border-color: var(--accent-teal);
-            box-shadow: 0 0 20px rgba(15, 82, 95, 0.2);
-        }
-
-        /* Category Grid */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-            max-width: 900px;
-            margin: 0 auto 40px;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.6s ease;
-        }
-
-        .student-view.visible .category-grid {
-            opacity: 1;
-            transform: translateY(0);
-            transition-delay: 0.2s;
-        }
-
-        .category-card {
-            padding: 20px;
-            border-radius: 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .category-card:hover {
-            border-color: var(--accent-teal);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(15, 82, 95, 0.2);
-        }
-
-        .category-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .category-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .category-count {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Content Cards */
-        .content-area {
-            max-width: 900px;
-            margin: 0 auto;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.6s ease;
-        }
-
-        .student-view.visible .content-area {
-            opacity: 1;
-            transform: translateY(0);
-            transition-delay: 0.3s;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .content-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .content-card {
-            padding: 20px 24px;
-            border-radius: 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .content-card:hover {
-            border-color: var(--accent-teal);
-            transform: translateX(4px);
-        }
-
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            background: rgba(15, 82, 95, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .card-info {
-            flex: 1;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .card-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .card-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            gap: 12px;
-        }
-
-        /* Section transitions */
-        .section-content {
-            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .section-content.inactive {
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-        }
-
-        .section-content.active {
-            opacity: 1;
-            max-height: 2000px;
-        }
-
-        /* Scrollbar */
-        .student-view::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .student-view::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .student-view::-webkit-scrollbar-thumb {
-            background: rgba(15, 82, 95, 0.3);
-            border-radius: 3px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-title { font-size: 32px; }
-            .hero-cta-group { flex-direction: column; }
-            .category-grid { grid-template-columns: repeat(2, 1fr); }
-            .navbar { padding-left: 120px; gap: 16px; }
-            .nav-item { font-size: 12px; padding: 4px 8px; }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 450px; }
+        .platform-card:hover { transform: translateY(-4px); transition: all 0.3s ease; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-<base target="_blank">
 </head>
-<body>
-    <div id="root"></div>
+<body class="antialiased">
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback } = React;
+    <!-- Application Structure Plan: 
+        1. Header & Executive Summary: Sets the context of the EdTech/Social intersection.
+        2. Strategic Landscape (Dashboard): A high-level visualization using a Bubble Chart to map "Learning Depth" vs "Social Interaction" vs "Market Scale". This allows users to see where clusters form (e.g., LMS vs Marketplaces).
+        3. Platform Explorer: The core interactive component. A filterable grid of 12 key platforms. Users can filter by "Category" to understand structural differences.
+        4. Platform Detail View: A dynamic side-panel or modal that updates based on selection, providing deep-dive specs and a Radar Chart showing specific feature strengths (Social, Learning, Professional, Marketplace).
+        5. The Pipeline Synthesis: A summary section explaining the Education-to-Career flow.
+    -->
 
-        // ─── STATE MACHINE CONSTANTS ───
-        const STATE_HOME = 'STATE_HOME';
-        const STATE_TRANSITION_TO_STUDENT = 'STATE_TRANSITION_TO_STUDENT';
-        const STATE_STUDENT = 'STATE_STUDENT';
-        const STATE_TRANSITION_TO_HOME = 'STATE_TRANSITION_TO_HOME';
+    <nav class="sticky top-0 z-50 glass-panel border-b border-slate-200 py-4 px-6 mb-8">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">E</div>
+                <span class="text-xl font-bold text-slate-800 tracking-tight">EdTech<span class="text-indigo-600">Intel</span></span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                <a href="#landscape" class="hover:text-indigo-600 transition">Landscape Map</a>
+                <a href="#explorer" class="hover:text-indigo-600 transition">Platform Explorer</a>
+                <a href="#analysis" class="hover:text-indigo-600 transition">Strategic Analysis</a>
+            </div>
+        </div>
+    </nav>
 
-        // ─── STAR BACKGROUND COMPONENT ───
-        function StarBackground() {
-            const stars = Array.from({ length: 80 }, (_, i) => ({
-                id: i,
-                left: Math.random() * 100,
-                top: Math.random() * 100,
-                size: Math.random() * 2 + 1,
-                opacity: Math.random() * 0.5 + 0.2,
-                delay: Math.random() * 5
+    <main class="max-w-7xl mx-auto px-4 pb-20">
+        <!-- Hero Section -->
+        <section class="mb-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">The Convergence of Learning & Networking</h1>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Analyzing the platforms that bridge academic rigor with professional opportunity. This intelligence report maps the global SaaS ecosystem where skill acquisition meets career transition.
+            </p>
+        </section>
+
+        <!-- Visualization & Content Choices: 
+            - Goal: Compare Landscape | Viz: Bubble Chart | Library: Chart.js
+            - Justification: Best for showing three dimensions (Interaction, Learning Depth, Market Size) simultaneously to reveal categorical clusters.
+            - Goal: Detail Deep Dive | Viz: Radar Chart | Library: Chart.js
+            - Justification: Excellent for comparing specific strengths of a single platform across four key pillars: Social, Learning, Career, and Marketplace.
+            - Goal: Filter Information | Element: Dynamic Cards + Filter Logic | Library: Vanilla JS
+            - Justification: Allows users to focus on specific segments (e.g., LMS vs Tutoring) without information overload.
+        -->
+
+        <!-- Landscape Section -->
+        <section id="landscape" class="mb-20">
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Market Ecosystem Positioning</h2>
+                    <p class="text-slate-600 italic">This map visualizes the tension between deep academic content and social/networking utility. Large bubbles indicate higher institutional or global adoption.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="landscapeChart"></canvas>
+                </div>
+                <div class="mt-6 flex flex-wrap justify-center gap-4 text-xs font-semibold uppercase tracking-wider">
+                    <span class="flex items-center text-blue-600"><span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span> Professional/Career</span>
+                    <span class="flex items-center text-indigo-600"><span class="w-3 h-3 bg-indigo-500 rounded-full mr-1"></span> Academic/LMS</span>
+                    <span class="flex items-center text-emerald-600"><span class="w-3 h-3 bg-emerald-500 rounded-full mr-1"></span> Marketplaces</span>
+                    <span class="flex items-center text-orange-600"><span class="w-3 h-3 bg-orange-500 rounded-full mr-1"></span> Social Communities</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Explorer Section -->
+        <section id="explorer" class="mb-20">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Platform Explorer</h2>
+                    <p class="text-slate-600">Select a category to filter or a platform to view granular specifications.</p>
+                </div>
+                <div class="flex flex-wrap gap-2" id="filterButtons">
+                    <button onclick="filterPlatforms('All')" class="px-4 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium shadow-sm">All</button>
+                    <button onclick="filterPlatforms('LMS')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">LMS</button>
+                    <button onclick="filterPlatforms('Network')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">Networks</button>
+                    <button onclick="filterPlatforms('Marketplace')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">Marketplaces</button>
+                    <button onclick="filterPlatforms('Skill-based')" class="px-4 py-2 rounded-full bg-white text-slate-600 border border-slate-200 text-sm font-medium hover:border-indigo-400 transition">Skill-based</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- List Side -->
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar" id="platformGrid">
+                    <!-- Dynamic Content Loaded via JS -->
+                </div>
+
+                <!-- Detail Side -->
+                <div class="lg:col-span-1">
+                    <div id="detailPanel" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sticky top-24">
+                        <div id="emptyDetail" class="text-center py-20 text-slate-400">
+                            <div class="text-5xl mb-4">🔭</div>
+                            <p>Select a platform to explore detailed analytics and feature sets.</p>
+                        </div>
+                        <div id="activeDetail" class="hidden">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 id="detName" class="text-2xl font-bold text-slate-900">Platform Name</h3>
+                                    <span id="detCategory" class="text-xs font-bold uppercase tracking-widest text-indigo-600">Category</span>
+                                </div>
+                                <div id="detScale" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold">10M+ Users</div>
+                            </div>
+                            
+                            <p id="detValProp" class="text-sm text-slate-600 mb-6 italic border-l-4 border-indigo-200 pl-3">Value proposition text here.</p>
+                            
+                            <div class="mb-8">
+                                <h4 class="text-sm font-bold text-slate-800 mb-4">Capability Profile</h4>
+                                <div class="w-full h-48">
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="p-3 bg-slate-50 rounded-xl">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">Primary Users</h5>
+                                    <p id="detUsers" class="text-sm text-slate-800">Higher Ed, Professionals</p>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">Core Features</h5>
+                                    <ul id="detFeatures" class="text-sm text-slate-800 space-y-1">
+                                        <!-- Dynamic list -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Section -->
+        <section id="analysis" class="grid grid-cols-1 md:grid-cols-2 gap-12 pt-16 border-t border-slate-200">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">The Education-to-Career Pipeline</h2>
+                <p class="text-slate-600 mb-4 leading-relaxed">
+                    Modern EdTech is shifting from simple content delivery (LMS 1.0) to integrated ecosystems that treat learning as a social and professional asset. We identify three distinct shifts:
+                </p>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">1</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Credential-First Networking</h4>
+                            <p class="text-sm text-slate-500">Platforms like Coursera and GitHub use completed projects and certificates as the foundation for professional identity, replacing the traditional CV.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">2</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Marketplace Integration</h4>
+                            <p class="text-sm text-slate-500">The rise of "Direct-to-Expert" platforms (Maven, Outschool) creates fluid marketplaces where the teacher-student bond is a dynamic social transaction.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">3</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Early-Career Gatewaying</h4>
+                            <p class="text-sm text-slate-500">Specialized networks like Handshake have successfully disintermediated LinkedIn for the Gen-Z demographic by focusing on institutional integration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-indigo-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-bold mb-4">Strategic Conclusion</h2>
+                    <p class="text-indigo-100 mb-6 leading-relaxed">
+                        The "Winner-Take-All" effect is becoming evident in niche EdTech verticals. Successful platforms no longer just offer courses; they offer <strong>communities and career trajectories</strong>. 
+                    </p>
+                    <div class="p-6 bg-indigo-800/50 rounded-2xl border border-indigo-700">
+                        <h4 class="text-indigo-300 uppercase text-xs font-bold tracking-widest mb-3">Core Insight</h4>
+                        <p class="text-lg font-medium italic">"The most valuable asset in EdTech is no longer content—it is the social validation of acquired skills within a professional network."</p>
+                    </div>
+                </div>
+                <!-- Abstract visual element using CSS -->
+                <div class="absolute -bottom-10 -right-10 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                <div class="absolute top-10 right-10 w-24 h-24 bg-white/5 rounded-full border border-white/10"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-sm">
+            <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-xs">E</div>
+                <span class="text-white font-bold tracking-tight">EdTechIntel Report 2024</span>
+            </div>
+            <p>Data provided for market analysis purposes. All trademarks belong to their respective owners.</p>
+            <div class="flex gap-6">
+                <span>Privacy Policy</span>
+                <span>Terms of Service</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script>
+        const platforms = [
+            {
+                id: 1,
+                name: "Canvas by Instructure",
+                category: "LMS",
+                users: "K12, Higher Ed, Institutions",
+                valProp: "The backbone of modern academic infrastructure.",
+                scale: "30M+ Users",
+                scores: [30, 95, 20, 10], // Social, Learning, Career, Marketplace
+                features: ["Classroom Management", "Social Discussions", "Global Peer Review", "Integration APIs"],
+                bubble: { x: 20, y: 90, r: 25, color: '#4f46e5' }
+            },
+            {
+                id: 2,
+                name: "Handshake",
+                category: "Network",
+                users: "Students, Career Centers, Employers",
+                valProp: "The early-career alternative to LinkedIn for Gen Z.",
+                scale: "12M+ Students",
+                scores: [70, 20, 95, 40],
+                features: ["Virtual Career Fairs", "Student-to-Employer Messaging", "Verified Internships", "Alumni Networking"],
+                bubble: { x: 85, y: 30, r: 18, color: '#2563eb' }
+            },
+            {
+                id: 3,
+                name: "Coursera",
+                category: "Skill-based",
+                users: "Lifelong Learners, Professionals",
+                valProp: "Democratizing Ivy League education through scale.",
+                scale: "140M+ Learners",
+                scores: [25, 90, 80, 50],
+                features: ["University Certificates", "Guided Projects", "Peer Interaction", "Enterprise Upskilling"],
+                bubble: { x: 40, y: 80, r: 30, color: '#10b981' }
+            },
+            {
+                id: 4,
+                name: "Maven",
+                category: "Marketplace",
+                users: "Experts, Creators, Professionals",
+                valProp: "Pioneering cohort-based learning with community density.",
+                scale: "$25M+ Funding",
+                scores: [85, 75, 40, 90],
+                features: ["Cohort Management", "Community Boards", "Expert Matching", "Interactive Workshops"],
+                bubble: { x: 75, y: 70, r: 10, color: '#f59e0b' }
+            },
+            {
+                id: 5,
+                name: "GitHub",
+                category: "Skill-based",
+                users: "Developers, Students, Recruiters",
+                valProp: "The definitive portfolio and professional network for tech.",
+                scale: "100M+ Devs",
+                scores: [60, 40, 98, 30],
+                features: ["Portfolio Hosting", "Social Coding", "Classroom Integration", "Job Matching"],
+                bubble: { x: 80, y: 45, r: 22, color: '#10b981' }
+            },
+            {
+                id: 6,
+                name: "Outschool",
+                category: "Marketplace",
+                users: "K12 Students, Independent Teachers",
+                valProp: "Interest-based live classes for younger learners.",
+                scale: "1M+ Classes",
+                scores: [50, 70, 10, 95],
+                features: ["Small Group Interaction", "Parent-Teacher Comms", "Marketplace Discovery", "Gamified Learning"],
+                bubble: { x: 50, y: 65, r: 15, color: '#f59e0b' }
+            },
+            {
+                id: 7,
+                name: "Piazza",
+                category: "Network",
+                users: "STEM Students, TAs, Professors",
+                valProp: "The leading Q&A social learning platform for Higher Ed.",
+                scale: "5M+ Students",
+                scores: [90, 60, 50, 5],
+                features: ["Wiki-style Editing", "Anonymous Q&A", "Career Career Recruiting", "LaTeX Support"],
+                bubble: { x: 90, y: 60, r: 12, color: '#2563eb' }
+            },
+            {
+                id: 8,
+                name: "Preply",
+                category: "Marketplace",
+                users: "Language Learners, Tutors",
+                valProp: "Human-centric skill exchange at a global scale.",
+                scale: "50k+ Tutors",
+                scores: [40, 60, 10, 98],
+                features: ["Tutor-Learner Matching", "Video Classroom", "Scheduling Suite", "Curriculum Marketplace"],
+                bubble: { x: 30, y: 55, r: 12, color: '#f59e0b' }
+            },
+            {
+                id: 9,
+                name: "LinkedIn Learning",
+                category: "Skill-based",
+                users: "Corporate Employees, Job Seekers",
+                valProp: "Seamlessly bridging content consumption and professional identity.",
+                scale: "950M+ Profiles",
+                scores: [45, 80, 95, 30],
+                features: ["Automatic Certificate Posting", "Skill Endorsements", "Learning Path Groups", "Recruiter Insights"],
+                bubble: { x: 60, y: 75, r: 28, color: '#10b981' }
+            },
+            {
+                id: 10,
+                name: "Discord (Education)",
+                category: "Network",
+                users: "Study Groups, Bootcamps, Online Communities",
+                valProp: "Turning casual social spaces into high-velocity learning zones.",
+                scale: "Millions of Study Servers",
+                scores: [98, 30, 20, 15],
+                features: ["Voice Study Rooms", "Roles & Hierarchies", "Bot Automation", "Screen Sharing"],
+                bubble: { x: 95, y: 25, r: 20, color: '#2563eb' }
+            },
+            {
+                id: 11,
+                name: "Chegg",
+                category: "Marketplace",
+                users: "Students, Tutors",
+                valProp: "The on-demand utility for academic support.",
+                scale: "8M+ Subscribers",
+                scores: [20, 50, 10, 90],
+                features: ["24/7 Expert Tutoring", "Homework Help", "Skills Platform", "Community Q&A"],
+                bubble: { x: 25, y: 40, r: 16, color: '#f59e0b' }
+            },
+            {
+                id: 12,
+                name: "Google Classroom",
+                category: "LMS",
+                users: "K12 Teachers, Students",
+                valProp: "The simplest workflow for digital social classrooms.",
+                scale: "150M+ Users",
+                scores: [40, 85, 10, 5],
+                features: ["Stream Communication", "Guardian Summaries", "G-Suite Integration", "Social Comments"],
+                bubble: { x: 15, y: 85, r: 24, color: '#4f46e5' }
+            }
+        ];
+
+        let radarChartInstance = null;
+        let landscapeChartInstance = null;
+
+        function initLandscapeChart() {
+            const ctx = document.getElementById('landscapeChart').getContext('2d');
+            const datasets = platforms.map(p => ({
+                label: p.name,
+                data: [{ x: p.bubble.x, y: p.bubble.y, r: p.bubble.r }],
+                backgroundColor: p.bubble.color + '88',
+                borderColor: p.bubble.color,
+                borderWidth: 2
             }));
 
-            return (
-                <div className="background-layer">
-                    <div className="noise-overlay"></div>
-                    <div className="stars">
-                        {stars.map(star => (
-                            <div
-                                key={star.id}
-                                className="star"
-                                style={{
-                                    left: `${star.left}%`,
-                                    top: `${star.top}%`,
-                                    width: `${star.size}px`,
-                                    height: `${star.size}px`,
-                                    opacity: star.opacity,
-                                    animationDelay: `${star.delay}s`
-                                }}
-                            />
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
-        // ─── LOGO ANCHOR COMPONENT ───
-        function LogoAnchor({ state, onClick }) {
-            const isCenter = state === STATE_HOME || state === STATE_TRANSITION_TO_HOME;
-            const isTopLeft = state === STATE_STUDENT || state === STATE_TRANSITION_TO_STUDENT;
-
-            return (
-                <div 
-                    className={`logo-anchor ${isCenter ? 'center' : ''} ${isTopLeft ? 'top-left' : ''}`}
-                    onClick={onClick}
-                >
-                    <div className="logo-icon">NIN</div>
-                    <div className="logo-text">Navigated Institute</div>
-                </div>
-            );
-        }
-
-        // ─── NAVBAR COMPONENT ───
-        function Navbar({ visible, activeSection, onNavClick }) {
-            const navItems = ['Dashboard', 'Courses', 'Opinions', 'Resources', 'Community'];
-
-            return (
-                <div className={`navbar ${visible ? 'visible' : ''}`}>
-                    {navItems.map(item => (
-                        <div
-                            key={item}
-                            className={`nav-item ${activeSection === item.toLowerCase() ? 'active' : ''}`}
-                            onClick={() => onNavClick(item.toLowerCase())}
-                        >
-                            {item}
-                        </div>
-                    ))}
-                </div>
-            );
-        }
-
-        // ─── HERO SECTION ───
-        function HeroSection({ state, onCtaClick }) {
-            const [loaded, setLoaded] = useState(false);
-
-            useEffect(() => {
-                if (state === STATE_HOME) {
-                    const timer = setTimeout(() => setLoaded(true), 100);
-                    return () => clearTimeout(timer);
-                } else {
-                    setLoaded(false);
-                }
-            }, [state]);
-
-            const isCompressed = state === STATE_TRANSITION_TO_STUDENT;
-            const isHidden = state === STATE_STUDENT || state === STATE_TRANSITION_TO_HOME;
-
-            return (
-                <div className={`hero-section ${loaded ? 'loaded' : ''} ${isCompressed ? 'compressed' : ''} ${isHidden ? 'hidden' : ''}`}>
-                    <div className="hero-content">
-                        <h1 className="hero-title">Navigated Institute Nexus</h1>
-                        <p className="hero-subtitle">Your gateway to knowledge, connections, and growth</p>
-                        <div className="hero-cta-group">
-                            <button className="cta-btn primary" onClick={() => onCtaClick('parent')}>Parent</button>
-                            <button className="cta-btn primary" onClick={() => onCtaClick('student')}>Student</button>
-                            <button className="cta-btn primary" onClick={() => onCtaClick('professional')}>Professional</button>
-                        </div>
-                        <div className="hero-secondary">
-                            <button className="cta-btn secondary small" onClick={() => onCtaClick('institute')}>Institute</button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ─── STUDENT VIEW ───
-        function StudentView({ state, activeSection, onNavClick }) {
-            const isVisible = state === STATE_STUDENT;
-            const isCollapsing = state === STATE_TRANSITION_TO_HOME;
-
-            const categories = [
-                { icon: '📚', name: 'Mathematics', count: '24 courses' },
-                { icon: '🔬', name: 'Science', count: '18 courses' },
-                { icon: '💻', name: 'Technology', count: '32 courses' },
-                { icon: '🎨', name: 'Arts', count: '15 courses' },
-                { icon: '🌍', name: 'Languages', count: '12 courses' },
-                { icon: '📊', name: 'Business', count: '20 courses' },
-            ];
-
-            const contentData = {
-                dashboard: [
-                    { icon: '📈', title: 'Learning Progress', desc: 'You have completed 68% of your current course', meta: 'Updated 2h ago' },
-                    { icon: '🏆', title: 'Recent Achievement', desc: 'Completed Advanced Calculus module with distinction', meta: 'Yesterday' },
-                    { icon: '📅', title: 'Upcoming Session', desc: 'Group study: Physics Problem Solving', meta: 'Today, 3:00 PM' },
-                    { icon: '💬', title: 'New Discussion', desc: '3 new replies in your subscribed threads', meta: '5 min ago' },
-                ],
-                courses: [
-                    { icon: '📐', title: 'Advanced Calculus II', desc: 'Multivariable calculus and differential equations', meta: '12 weeks · 85% complete' },
-                    { icon: '⚛️', title: 'Quantum Mechanics', desc: 'Fundamentals of quantum physics', meta: '16 weeks · 42% complete' },
-                    { icon: '🔌', title: 'Circuit Analysis', desc: 'AC/DC circuits and signal processing', meta: '10 weeks · 60% complete' },
-                    { icon: '🧬', title: 'Molecular Biology', desc: 'DNA replication and protein synthesis', meta: '14 weeks · 30% complete' },
-                ],
-                opinions: [
-                    { icon: '📝', title: 'Course Feedback: Calculus II', desc: 'Share your thoughts on the latest module', meta: 'Due in 3 days' },
-                    { icon: '📊', title: 'Institute Survey 2024', desc: 'Help us improve your learning experience', meta: '5 min survey' },
-                    { icon: '⭐', title: 'Rate Your Mentor', desc: 'Dr. Sarah Chen - Weekly evaluation', meta: 'Due this week' },
-                    { icon: '🤝', title: 'Peer Review Request', desc: '3 students requested your feedback', meta: 'Pending' },
-                ],
-                resources: [
-                    { icon: '📖', title: 'Digital Library Access', desc: '50,000+ academic papers and textbooks', meta: 'Available 24/7' },
-                    { icon: '🎥', title: 'Video Lecture Archive', desc: 'Recorded sessions from all departments', meta: '2,400+ videos' },
-                    { icon: '🔧', title: 'Lab Simulation Tools', desc: 'Virtual experiments and simulations', meta: 'Interactive' },
-                    { icon: '📱', title: 'Mobile Learning App', desc: 'Study on the go with offline access', meta: 'iOS & Android' },
-                ],
-                community: [
-                    { icon: '👥', title: 'Study Groups', desc: 'Join 12 active groups in your field', meta: '340 members online' },
-                    { icon: '📢', title: 'Announcements', desc: 'Institute news and event updates', meta: '3 new posts' },
-                    { icon: '❓', title: 'Q&A Forum', desc: 'Get help from peers and mentors', meta: '156 unanswered' },
-                    { icon: '🎉', title: 'Events Calendar', desc: 'Webinars, workshops, and meetups', meta: '8 upcoming' },
-                ],
-            };
-
-            const currentContent = contentData[activeSection] || contentData.dashboard;
-
-            return (
-                <div className={`student-view ${isVisible ? 'visible' : ''} ${isCollapsing ? 'collapsing' : ''}`}>
-                    {/* Search Module */}
-                    <div className="search-module">
-                        <input 
-                            type="text" 
-                            className="search-box" 
-                            placeholder="Search courses, resources, mentors..."
-                        />
-                    </div>
-
-                    {/* Category Grid */}
-                    <div className="category-grid">
-                        {categories.map((cat, i) => (
-                            <div key={i} className="category-card">
-                                <div className="category-icon">{cat.icon}</div>
-                                <div className="category-name">{cat.name}</div>
-                                <div className="category-count">{cat.count}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Content Area */}
-                    <div className="content-area">
-                        <div className="section-header">
-                            <h2 className="section-title">
-                                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}
-                            </h2>
-                        </div>
-                        <div className="content-cards">
-                            {currentContent.map((item, i) => (
-                                <div key={i} className="content-card">
-                                    <div className="card-icon">{item.icon}</div>
-                                    <div className="card-info">
-                                        <div className="card-title">{item.title}</div>
-                                        <div className="card-desc">{item.desc}</div>
-                                        <div className="card-meta">{item.meta}</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ─── MAIN APP ───
-        function App() {
-            const [state, setState] = useState(STATE_HOME);
-            const [activeSection, setActiveSection] = useState('dashboard');
-            const transitionTimerRef = useRef(null);
-
-            // Clear any pending transitions on unmount
-            useEffect(() => {
-                return () => {
-                    if (transitionTimerRef.current) {
-                        clearTimeout(transitionTimerRef.current);
+            landscapeChartInstance = new Chart(ctx, {
+                type: 'bubble',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { display: true, text: 'Social Interaction & Networking Strength →', font: { weight: 'bold' } },
+                            min: 0, max: 100 
+                        },
+                        y: { 
+                            title: { display: true, text: 'Depth of Structured Learning →', font: { weight: 'bold' } },
+                            min: 0, max: 100 
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => context.dataset.label
+                            }
+                        },
+                        legend: { display: false }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].datasetIndex;
+                            showDetail(platforms[index].id);
+                        }
                     }
-                };
-            }, []);
-
-            const handleCtaClick = useCallback((type) => {
-                if (type === 'student') {
-                    // PHASE A: Start transition to student
-                    setState(STATE_TRANSITION_TO_STUDENT);
-
-                    // PHASE C: After animation completes, switch to student state
-                    transitionTimerRef.current = setTimeout(() => {
-                        setState(STATE_STUDENT);
-                    }, 800);
                 }
-            }, []);
-
-            const handleLogoClick = useCallback(() => {
-                if (state === STATE_STUDENT || state === STATE_TRANSITION_TO_STUDENT) {
-                    // PHASE A: Start transition back to home
-                    setState(STATE_TRANSITION_TO_HOME);
-
-                    // PHASE C: After animation completes, restore home state
-                    transitionTimerRef.current = setTimeout(() => {
-                        setState(STATE_HOME);
-                    }, 800);
-                }
-            }, [state]);
-
-            const handleNavClick = useCallback((section) => {
-                setActiveSection(section);
-            }, []);
-
-            const showNavbar = state === STATE_STUDENT || state === STATE_TRANSITION_TO_STUDENT || state === STATE_TRANSITION_TO_HOME;
-
-            return (
-                <div id="app">
-                    <StarBackground />
-                    <div className="ui-root">
-                        <LogoAnchor state={state} onClick={handleLogoClick} />
-                        <Navbar 
-                            visible={showNavbar} 
-                            activeSection={activeSection} 
-                            onNavClick={handleNavClick}
-                        />
-                        <HeroSection state={state} onCtaClick={handleCtaClick} />
-                        <StudentView 
-                            state={state} 
-                            activeSection={activeSection}
-                            onNavClick={handleNavClick}
-                        />
-                    </div>
-                </div>
-            );
+            });
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function updateRadarChart(scores) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+            
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Social', 'Learning', 'Career', 'Marketplace'],
+                    datasets: [{
+                        label: 'Strength',
+                        data: scores,
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: 'rgb(79, 70, 229)',
+                        pointBackgroundColor: 'rgb(79, 70, 229)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { beginAtZero: true, max: 100, ticks: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function showDetail(id) {
+            const p = platforms.find(x => x.id === id);
+            document.getElementById('emptyDetail').classList.add('hidden');
+            document.getElementById('activeDetail').classList.remove('hidden');
+            
+            document.getElementById('detName').innerText = p.name;
+            document.getElementById('detCategory').innerText = p.category;
+            document.getElementById('detScale').innerText = p.scale;
+            document.getElementById('detValProp').innerText = p.valProp;
+            document.getElementById('detUsers').innerText = p.users;
+            
+            const featureList = document.getElementById('detFeatures');
+            featureList.innerHTML = p.features.map(f => `<li class="flex items-start"><span class="text-indigo-500 mr-2">•</span>${f}</li>`).join('');
+            
+            updateRadarChart(p.scores);
+            
+            // Scroll to detail on mobile
+            if(window.innerWidth < 1024) {
+                document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function filterPlatforms(cat) {
+            const grid = document.getElementById('platformGrid');
+            const btns = document.querySelectorAll('#filterButtons button');
+            
+            btns.forEach(b => {
+                if(b.innerText === cat) {
+                    b.classList.remove('bg-white', 'text-slate-600');
+                    b.classList.add('bg-indigo-600', 'text-white');
+                } else {
+                    b.classList.add('bg-white', 'text-slate-600');
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                }
+            });
+
+            const filtered = cat === 'All' ? platforms : platforms.filter(p => p.category === cat);
+            
+            grid.innerHTML = filtered.map(p => `
+                <div onclick="showDetail(${p.id})" class="platform-card cursor-pointer bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded uppercase tracking-wide">${p.category}</span>
+                        <span class="text-[10px] font-bold text-emerald-500">POPULAR</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-1">${p.name}</h3>
+                    <p class="text-xs text-slate-500 line-clamp-2">${p.valProp}</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 font-medium">${p.scale}</span>
+                        <span class="text-indigo-600 text-xs font-bold flex items-center">Analyze →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        window.onload = () => {
+            initLandscapeChart();
+            filterPlatforms('All');
+        };
     </script>
 </body>
 </html>
